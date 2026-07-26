@@ -45,12 +45,12 @@ function fitCanvas() {
 
 // --- Gallery UI ------------------------------------------------------------
 
-function buildGallery() {
+async function buildGallery() {
   const root = document.getElementById('gallery');
   root.innerHTML = '';
 
   appendCategorySection(root);
-  appendUserBrushSection(root);
+  await appendUserBrushSection(root);
 
   refreshSelection();
 }
@@ -95,9 +95,15 @@ function appendCategorySection(root) {
   }
 }
 
-// User-saved brushes live in localStorage. Right-click a button to delete it.
-function appendUserBrushSection(root) {
-  const brushes = getBrushes();
+// User-saved brushes are loaded from the backend (SQLite). Right-click to delete.
+async function appendUserBrushSection(root) {
+  let brushes;
+  try {
+    brushes = await getBrushes();
+  } catch (err) {
+    console.error('Could not load saved brushes:', err);
+    return;
+  }
   if (brushes.length === 0) return;
 
   const section = document.createElement('div');
@@ -128,17 +134,16 @@ function appendUserBrushSection(root) {
     btn.appendChild(label);
 
     btn.addEventListener('click', () => selectBrush(b.id, b.name, matrix));
-    btn.addEventListener('contextmenu', (e) => {
+    btn.addEventListener('contextmenu', async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (confirm(`Delete brush "${b.name}"?`)) {
-        deleteBrush(b.id);
-        // Reset to the default brush if we just deleted the active one.
-        if (brushKey === b.id) {
-          selectBrush('cell', PATTERN_MAP['cell'].name, PATTERN_MAP['cell'].matrix);
-        }
-        buildGallery();
+      if (!confirm(`Delete brush "${b.name}"?`)) return;
+      await deleteBrush(b.id);
+      // Reset to the default brush if we just deleted the active one.
+      if (brushKey === b.id) {
+        selectBrush('cell', PATTERN_MAP['cell'].name, PATTERN_MAP['cell'].matrix);
       }
+      await buildGallery();
     });
 
     grid.appendChild(btn);
@@ -317,10 +322,10 @@ function bindGame() {
   renderer.game = game;
 }
 
-function init() {
+async function init() {
   fitCanvas();
   bindGame();
-  buildGallery();
+  await buildGallery();
   updateBrushLabel();
   setPlayLabel();
   game.randomize(0.25);
@@ -332,4 +337,4 @@ window.addEventListener('resize', () => {
   bindGame();
 });
 
-init();
+init().catch((err) => console.error('Init failed:', err));

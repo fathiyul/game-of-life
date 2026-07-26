@@ -1,35 +1,71 @@
 # Conway's Game of Life
 
 An interactive [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)
-with a gallery of well-known patterns ("organisms") that you can paint onto the grid.
+with a pattern gallery of well-known organisms, a brush editor for designing your
+own, and SQLite-backed persistence.
 
 ## Features
 
 - Live simulation with the standard rules and wrap-around (toroidal) edges.
-- **Pattern gallery** — pick a brush from still lifes, oscillators, spaceships,
-  a glider gun, and methuselahs, then click/drag to stamp them onto the grid.
-- **Rotate** the current brush to orient spaceships any way you like.
-- Controls: Play/Pause, Randomize, Clear, speed slider, generation counter.
-- A verified pattern catalog (see below).
+- **Pattern gallery** — still lifes, oscillators, spaceships, a glider gun, and
+  methuselahs. Pick one as a brush and stamp it onto the grid (right-click to
+  rotate; `R`).
+- **Brush editor** (`create.html`) — draw freely with larger cells, evolve your
+  design, revert to the pre-animation state, stash drafts, and save finished
+  brushes (auto-cropped to their bounding box).
+- Saved brushes and drafts persist in a real SQLite database.
+
+## Architecture
+
+A small full-stack app: a static frontend served by a Node backend.
+
+```
+game-of-life/
+├── package.json              # npm workspaces + "npm start"
+├── frontend/                 # static client (HTML/CSS/ES modules)
+│   ├── index.html            # gallery playground
+│   ├── create.html           # brush editor
+│   ├── css/style.css
+│   ├── src/
+│   │   ├── main.js           # gallery page entry
+│   │   ├── create.js         # editor page entry
+│   │   ├── storage.js        # fetch()-based persistence (talks to the API)
+│   │   ├── game.js           # simulation core (no DOM)
+│   │   ├── renderer.js       # canvas drawing + pattern icons
+│   │   └── patterns.js       # built-in catalog + parsers (plaintext & RLE)
+│   └── test/verify.js        # validates built-in patterns evolve correctly
+├── backend/                  # Node + Express + better-sqlite3
+│   ├── server.js             # serves frontend + JSON API
+│   ├── db.js                 # SQLite connection, schema, queries
+│   └── routes/items.js       # generic CRUD router for brushes & drafts
+└── data/                     # gitignored — the SQLite file lives here
+    └── game-of-life.sqlite
+```
+
+The frontend and backend share one contract: a pattern is an array of `O`/`.`
+strings (`rows`), so width & height are implicit.
 
 ## Run it
 
-Because the code is split into ES modules, you need to serve it over HTTP
-(opening `index.html` directly via `file://` will be blocked by the browser).
-
-Pick any one of these:
-
 ```bash
-# Python (built in on most systems)
-python3 -m http.server 8000
-
-# Node
-npx serve .
+npm install      # installs backend deps (better-sqlite3, express)
+npm start        # starts the server (serves frontend + API on one port)
 ```
 
-Then open <http://localhost:8000>.
+Then open <http://localhost:3000>.
 
-## Controls
+- `/` (`index.html`) — the gallery playground.
+- `/create.html` — the brush editor.
+- `GET / POST / DELETE` on `/api/brushes` and `/api/drafts` — the JSON API.
+
+The database file is created automatically at `data/game-of-life.sqlite` on first
+run. Inspect it with any SQLite client, e.g.:
+
+```bash
+sqlite3 data/game-of-life.sqlite "SELECT id, name FROM brushes;"
+```
+
+## Controls (gallery page)
 
 | Action | Input |
 | --- | --- |
@@ -38,46 +74,26 @@ Then open <http://localhost:8000>.
 | Rotate brush 90° | Right-click on grid (or `R`) |
 | Clear the grid (also pauses) | `C` |
 | Randomize | `Z` |
-| Adjust speed | The slider |
 
-The default brush is a single cell (toggle paint). Select any pattern in the
-gallery to make it your brush — clicking then stamps that pattern, and dragging
-drops a trail of them.
+## Creating your own brushes (editor page)
 
-## Project structure
+Open **Create Brush** (the `+ Create Brush` link) and draw with single cells, then
+press **Play** to evolve it.
 
-```
-.
-├── index.html          # Gallery playground page
-├── create.html         # Brush editor page
-├── css/
-│   └── style.css       # Layout & theme
-├── src/
-│   ├── main.js         # Gallery page entry: input, controls, animation loop
-│   ├── create.js       # Editor page entry: draw, evolve, save
-│   ├── storage.js      # localStorage persistence for brushes & drafts
-│   ├── game.js         # Simulation core (grid, step, stamp) — no DOM
-│   ├── renderer.js     # Canvas drawing + pattern icons
-│   └── patterns.js     # Built-in pattern catalog + parsers (plaintext & RLE)
-└── test/
-    └── verify.js       # Validates built-in patterns evolve correctly
-```
+- **Revert** (`R`) — restore the board to how it was when Play was last pressed.
+- **Save Draft** — stash the whole board; listed in the side panel to re-load.
+- **Save Brush** — crop to the live cells (w/h computed automatically) and add it
+  to your gallery.
 
-## Persistence
+Saved brushes appear under **My Brushes** on the gallery page (right-click to
+delete).
 
-Brushes and drafts are stored in the browser's **localStorage** (keys
-`gol:brushes` and `gol:drafts`) as compact `O`/`.` row strings — the same format
-as the built-in catalog, so width & height are implicit. This keeps the project
-a dependency-free static site. The storage layer in `src/storage.js` is
-isolated, so it could be swapped for a server-backed SQLite database later
-without touching the UI.
+## Verify the patterns
 
-## Verifying the patterns
-
-Each pattern is checked to behave like real Game of Life: still lifes stay put,
-oscillators loop on their period, spaceships translate, and the glider gun keeps
-emitting gliders.
+The built-in catalog is checked to behave like real Game of Life (still lifes
+stable, oscillators on their period, spaceships translate, the gun emits
+gliders):
 
 ```bash
-node test/verify.js
+npm run verify
 ```

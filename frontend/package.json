@@ -1,0 +1,9 @@
+{
+  "name": "game-of-life-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "verify": "node test/verify.js"
+  }
+}

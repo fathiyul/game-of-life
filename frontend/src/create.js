@@ -81,21 +81,25 @@ function revert() {
 
 // --- save actions ----------------------------------------------------------
 
-function saveBrush() {
+async function saveBrush() {
   const matrix = cropToBoundingBox(gridToMatrix(game));
   if (!matrix) {
     flash('Nothing to save — draw something first.');
     return;
   }
-  const name = nameInput.value.trim() || `Brush ${getBrushes().length + 1}`;
-  addBrush(name, matrix);
+  let existing = [];
+  try { existing = await getBrushes(); } catch { /* ignore count failure */ }
+  const name = nameInput.value.trim() || `Brush ${existing.length + 1}`;
+  await addBrush(name, matrix);
   flash(`Saved "${name}" — find it in the gallery.`);
 }
 
-function saveDraft() {
-  const name = nameInput.value.trim() || `Draft ${getDrafts().length + 1}`;
-  addDraft(name, gridToMatrix(game));
-  renderDrafts();
+async function saveDraft() {
+  let existing = [];
+  try { existing = await getDrafts(); } catch { /* ignore count failure */ }
+  const name = nameInput.value.trim() || `Draft ${existing.length + 1}`;
+  await addDraft(name, gridToMatrix(game));
+  await renderDrafts();
   flash(`Saved draft "${name}".`);
 }
 
@@ -111,14 +115,22 @@ function flash(msg) {
 
 // --- drafts panel ----------------------------------------------------------
 
-function renderDrafts() {
+async function renderDrafts() {
   draftsList.innerHTML = '';
-  const drafts = [...getDrafts()].reverse(); // newest first
-  if (drafts.length === 0) {
+  let drafts;
+  try {
+    drafts = await getDrafts();
+  } catch (err) {
+    console.error('Could not load drafts:', err);
+    draftsList.innerHTML = '<li class="muted">Could not load drafts.</li>';
+    return;
+  }
+  const list = [...drafts].reverse(); // newest first
+  if (list.length === 0) {
     draftsList.innerHTML = '<li class="muted">No drafts yet.</li>';
     return;
   }
-  for (const d of drafts) {
+  for (const d of list) {
     const li = document.createElement('li');
 
     const load = document.createElement('button');
@@ -139,9 +151,9 @@ function renderDrafts() {
     del.className = 'draft-del';
     del.textContent = '\u00d7';
     del.title = 'Delete draft';
-    del.addEventListener('click', () => {
-      deleteDraft(d.id);
-      renderDrafts();
+    del.addEventListener('click', async () => {
+      await deleteDraft(d.id);
+      await renderDrafts();
     });
 
     li.appendChild(load);

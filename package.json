@@ -1,10 +1,12 @@
 {
   "name": "game-of-life",
   "version": "1.0.0",
-  "description": "Conway's Game of Life with a pattern gallery and paintable brushes.",
-  "type": "module",
+  "private": true,
+  "description": "Conway's Game of Life with a pattern gallery, brush editor, and SQLite-backed persistence.",
+  "workspaces": ["frontend", "backend"],
   "scripts": {
-    "verify": "node test/verify.js"
+    "start": "npm --workspace backend start",
+    "verify": "npm --workspace frontend run verify"
   },
   "license": "MIT"
 }
