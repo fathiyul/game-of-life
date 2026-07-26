@@ -188,7 +188,7 @@ window.addEventListener('keydown', (e) => {
   } else if (e.key === 'r' || e.key === 'R') {
     rotateBrush();
   } else if (e.key === 'c' || e.key === 'C') {
-    game.clear();
+    clearGrid();
   }
 });
 
@@ -200,15 +200,20 @@ function togglePlay() {
   playBtn.textContent = running ? 'Pause' : 'Play';
 }
 
+// Clear the grid and pause so the empty board stays visible.
+function clearGrid() {
+  game.clear();
+  running = false;
+  playBtn.textContent = 'Play';
+}
+
 playBtn.addEventListener('click', togglePlay);
 
 document.getElementById('randomize').addEventListener('click', () => {
   game.randomize(0.25);
 });
 
-document.getElementById('clear').addEventListener('click', () => {
-  game.clear();
-});
+document.getElementById('clear').addEventListener('click', clearGrid);
 
 document.getElementById('speed').addEventListener('input', (e) => {
   speed = parseInt(e.target.value, 10);
