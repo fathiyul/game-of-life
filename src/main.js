@@ -189,22 +189,30 @@ window.addEventListener('keydown', (e) => {
     rotateBrush();
   } else if (e.key === 'c' || e.key === 'C') {
     clearGrid();
+  } else if (e.key === 'p' || e.key === 'P') {
+    togglePlay();
+  } else if (e.key === 'z' || e.key === 'Z') {
+    game.randomize(0.25);
   }
 });
 
 // --- Controls --------------------------------------------------------------
 
 const playBtn = document.getElementById('play');
+function setPlayLabel() {
+  const word = running ? 'Pause' : 'Play';
+  playBtn.innerHTML = `<span class="hk">${word[0]}</span>${word.slice(1)}`;
+}
 function togglePlay() {
   running = !running;
-  playBtn.textContent = running ? 'Pause' : 'Play';
+  setPlayLabel();
 }
 
 // Clear the grid and pause so the empty board stays visible.
 function clearGrid() {
   game.clear();
   running = false;
-  playBtn.textContent = 'Play';
+  setPlayLabel();
 }
 
 playBtn.addEventListener('click', togglePlay);
@@ -250,6 +258,7 @@ function init() {
   bindGame();
   buildGallery();
   updateBrushLabel();
+  setPlayLabel();
   game.randomize(0.25);
   requestAnimationFrame(loop);
 }

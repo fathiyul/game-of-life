@@ -34,10 +34,10 @@ Then open <http://localhost:8000>.
 | Action | Input |
 | --- | --- |
 | Paint / stamp the current brush | Click + drag on the grid |
-| Play / pause | `Space` (or the button) |
-| Rotate brush 90° | Right-click on grid (or `R`, or the button) |
-| Clear the grid | `C` (or the button) |
-| Randomize | The Randomize button |
+| Play / pause | `P` or `Space` |
+| Rotate brush 90° | Right-click on grid (or `R`) |
+| Clear the grid (also pauses) | `C` |
+| Randomize | `Z` |
 | Adjust speed | The slider |
 
 The default brush is a single cell (toggle paint). Select any pattern in the

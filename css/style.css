@@ -66,6 +66,14 @@ button:hover {
   border-color: #444;
 }
 
+/* Highlighted access-key letter inside a button label */
+.hk {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  color: #00e0ff;
+}
+
 .slider {
   display: inline-flex;
   align-items: center;
