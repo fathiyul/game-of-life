@@ -54,6 +54,18 @@ npm start        # starts the server (serves frontend + API on one port)
 
 Then open <http://localhost:3000>.
 
+### Development (auto-restart)
+
+During development, run the backend with auto-restart on file changes:
+
+```bash
+npm run dev      # nodemon watches backend/ and restarts on edits
+```
+
+Note: only backend changes trigger a restart. The frontend is served as static
+files, so after editing frontend code just **reload the browser** (`Ctrl+Shift+R`
+to bypass the module cache).
+
 - `/` (`index.html`) — the gallery playground.
 - `/create.html` — the brush editor.
 - `GET / POST / DELETE` on `/api/brushes` and `/api/drafts` — the JSON API.

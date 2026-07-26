@@ -6,6 +6,7 @@
   "workspaces": ["frontend", "backend"],
   "scripts": {
     "start": "npm --workspace backend start",
+    "dev": "npm --workspace backend run dev",
     "verify": "npm --workspace frontend run verify"
   },
   "license": "MIT"
