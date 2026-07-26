@@ -35,7 +35,7 @@ Then open <http://localhost:8000>.
 | --- | --- |
 | Paint / stamp the current brush | Click + drag on the grid |
 | Play / pause | `Space` (or the button) |
-| Rotate brush 90° | `R` (or the button) |
+| Rotate brush 90° | Right-click on grid (or `R`, or the button) |
 | Clear the grid | `C` (or the button) |
 | Randomize | The Randomize button |
 | Adjust speed | The slider |

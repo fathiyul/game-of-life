@@ -128,6 +128,7 @@ function stampAt(cell) {
 }
 
 canvas.addEventListener('mousedown', (e) => {
+  if (e.button !== 0) return; // left button only; right-click rotates
   const cell = cellFromEvent(e);
   if (cell.x < 0 || cell.x >= game.cols || cell.y < 0 || cell.y >= game.rows) return;
   painting = true;
@@ -165,6 +166,12 @@ canvas.addEventListener('mousemove', (e) => {
 
 canvas.addEventListener('mouseleave', () => {
   hoverCell = null;
+});
+
+// Right-click rotates the current brush 90° clockwise.
+canvas.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  rotateBrush();
 });
 
 window.addEventListener('mouseup', () => {
