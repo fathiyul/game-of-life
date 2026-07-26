@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Brush · Conway's Game of Life</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div class="topbar">
+    <a class="nav-link" href="index.html">&larr; Gallery</a>
+    <span class="title">Create Brush</span>
+    <div class="controls">
+      <button id="play"><span class="hk">P</span>lay</button>
+      <button id="revert" title="Restore the board to how it was when you pressed Play">
+        <span class="hk">R</span>evert
+      </button>
+      <button id="clear"><span class="hk">C</span>lear</button>
+      <input id="brush-name-input" type="text" placeholder="Brush name" maxlength="40" />
+      <button id="save-draft">Save Draft</button>
+      <button id="save-brush">Save Brush</button>
+      <label class="slider">Speed
+        <input type="range" id="speed" min="1" max="30" value="10" />
+      </label>
+      <span id="generation" class="status">Generation: 0</span>
+    </div>
+  </div>
+
+  <aside class="gallery drafts-panel">
+    <h3>Drafts</h3>
+    <ul id="drafts-list" class="drafts"></ul>
+    <p class="muted">Tip: Save Draft stashes the whole board to revisit later. Save Brush crops to the live cells and adds it to your gallery.</p>
+  </aside>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module" src="src/create.js"></script>
+</body>
+</html>

@@ -48,17 +48,29 @@ drops a trail of them.
 
 ```
 .
-├── index.html          # Page shell
+├── index.html          # Gallery playground page
+├── create.html         # Brush editor page
 ├── css/
 │   └── style.css       # Layout & theme
 ├── src/
-│   ├── main.js         # Entry point: input, controls, animation loop
+│   ├── main.js         # Gallery page entry: input, controls, animation loop
+│   ├── create.js       # Editor page entry: draw, evolve, save
+│   ├── storage.js      # localStorage persistence for brushes & drafts
 │   ├── game.js         # Simulation core (grid, step, stamp) — no DOM
 │   ├── renderer.js     # Canvas drawing + pattern icons
-│   └── patterns.js     # Pattern catalog + parsers (plaintext & RLE)
+│   └── patterns.js     # Built-in pattern catalog + parsers (plaintext & RLE)
 └── test/
-    └── verify.js       # Validates patterns evolve correctly
+    └── verify.js       # Validates built-in patterns evolve correctly
 ```
+
+## Persistence
+
+Brushes and drafts are stored in the browser's **localStorage** (keys
+`gol:brushes` and `gol:drafts`) as compact `O`/`.` row strings — the same format
+as the built-in catalog, so width & height are implicit. This keeps the project
+a dependency-free static site. The storage layer in `src/storage.js` is
+isolated, so it could be swapped for a server-backed SQLite database later
+without touching the UI.
 
 ## Verifying the patterns
 

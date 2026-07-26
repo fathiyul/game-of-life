@@ -3,6 +3,11 @@
 import { GameOfLife } from './game.js';
 import { Renderer, drawPatternIcon } from './renderer.js';
 import { PATTERNS, PATTERN_MAP, CATEGORIES, rotateCW } from './patterns.js';
+import {
+  getBrushes,
+  deleteBrush,
+  rowsToMatrix,
+} from './storage.js';
 
 const CELL_SIZE = 8;
 
@@ -12,6 +17,7 @@ let game = new GameOfLife(1, 1);
 
 // --- Brush state -----------------------------------------------------------
 let brushKey = 'cell';
+let brushName = 'Single Cell';
 let brushMatrix = PATTERN_MAP['cell'].matrix;
 let hoverCell = null;        // { x, y } of the cell under the cursor, or null
 let painting = false;
@@ -43,6 +49,13 @@ function buildGallery() {
   const root = document.getElementById('gallery');
   root.innerHTML = '';
 
+  appendCategorySection(root);
+  appendUserBrushSection(root);
+
+  refreshSelection();
+}
+
+function appendCategorySection(root) {
   for (const category of CATEGORIES) {
     const items = PATTERNS.filter((p) => p.category === category);
     if (items.length === 0) continue;
@@ -73,20 +86,72 @@ function buildGallery() {
       label.textContent = p.name;
       btn.appendChild(label);
 
-      btn.addEventListener('click', () => selectBrush(p.key));
+      btn.addEventListener('click', () => selectBrush(p.key, p.name, p.matrix));
       grid.appendChild(btn);
     }
 
     section.appendChild(grid);
     root.appendChild(section);
   }
-
-  refreshSelection();
 }
 
-function selectBrush(key) {
+// User-saved brushes live in localStorage. Right-click a button to delete it.
+function appendUserBrushSection(root) {
+  const brushes = getBrushes();
+  if (brushes.length === 0) return;
+
+  const section = document.createElement('div');
+  section.className = 'gallery-section';
+
+  const heading = document.createElement('h3');
+  heading.textContent = 'My Brushes';
+  section.appendChild(heading);
+
+  const grid = document.createElement('div');
+  grid.className = 'gallery-grid';
+
+  for (const b of brushes) {
+    const matrix = rowsToMatrix(b.rows);
+    const btn = document.createElement('button');
+    btn.className = 'pattern-btn';
+    btn.dataset.key = b.id;
+    btn.title = `${b.name} (right-click to delete)`;
+
+    const icon = document.createElement('canvas');
+    icon.width = 40;
+    icon.height = 40;
+    drawPatternIcon(icon, matrix);
+    btn.appendChild(icon);
+
+    const label = document.createElement('span');
+    label.textContent = b.name;
+    btn.appendChild(label);
+
+    btn.addEventListener('click', () => selectBrush(b.id, b.name, matrix));
+    btn.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (confirm(`Delete brush "${b.name}"?`)) {
+        deleteBrush(b.id);
+        // Reset to the default brush if we just deleted the active one.
+        if (brushKey === b.id) {
+          selectBrush('cell', PATTERN_MAP['cell'].name, PATTERN_MAP['cell'].matrix);
+        }
+        buildGallery();
+      }
+    });
+
+    grid.appendChild(btn);
+  }
+
+  section.appendChild(grid);
+  root.appendChild(section);
+}
+
+function selectBrush(key, name, matrix) {
   brushKey = key;
-  brushMatrix = PATTERN_MAP[key].matrix;
+  brushName = name;
+  brushMatrix = matrix;
   lastStampCell = null;
   refreshSelection();
   updateBrushLabel();
@@ -99,8 +164,7 @@ function refreshSelection() {
 }
 
 function updateBrushLabel() {
-  const name = PATTERN_MAP[brushKey].name;
-  brushLabel.textContent = `Brush: ${name}`;
+  brushLabel.textContent = `Brush: ${brushName}`;
 }
 
 function rotateBrush() {
