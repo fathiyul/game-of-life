@@ -115,3 +115,57 @@ gliders):
 ```bash
 npm run verify
 ```
+
+## Deploy to Google Cloud (Compute Engine)
+
+Because the app stores data in a local SQLite file, deploy it to a **single VM
+with a persistent disk** (Compute Engine). `startup.sh` provisions the VM for you:
+Node + git, your repo, `npm install`, and a systemd service running as an
+unprivileged user. The `data/` directory is gitignored, so your database
+survives reboots and redeploys.
+
+```bash
+# 1. reserve a stable external IP
+gcloud compute addresses create gol-ip --region=us-central1
+
+# 2. create the VM (edit the repo-url!)
+gcloud compute instances create game-of-life \
+  --zone=us-central1-a --machine-type=e2-small --tags=gameoflife \
+  --address=gol-ip --image-family=debian-12 --image-project=debian-cloud \
+  --metadata repo-url=https://github.com/YOU/game-of-life.git \
+  --metadata-from-file startup-script=startup.sh
+
+# 3. open port 3000
+gcloud compute firewall-rules create allow-gol \
+  --allow tcp:3000 --source-ranges 0.0.0.0/0 --target-tags gameoflife
+
+# 4. get the IP and open it in a browser
+gcloud compute addresses describe gol-ip --region=us-central1 --format='value(address)'
+```
+
+Then visit **http://THAT_IP:3000**. Watch provisioning with:
+
+```bash
+gcloud compute ssh game-of-life --zone=us-central1-a -- 'journalctl -u game-of-life -f'
+```
+
+Notes:
+- The startup script re-runs on every boot and does `git reset --hard`, so a
+  reboot also pulls your latest `main`. Push first, then reboot to redeploy.
+- For HTTPS, front it with Caddy (reverse proxy `localhost:3000`) and restrict
+  the firewall to 80/443.
+- To scale beyond one instance, migrate SQLite to Cloud SQL first.
+
+### Local deployment coordinates
+
+Keep your VM's project, zone, IPs, etc. in `secrets/gcp.env` (gitignored). The
+committed `secrets/gcp.env.example` documents the fields. Populate it in one go:
+
+```bash
+./scripts/fetch-gcp-env.sh     # or: npm run gcp:env
+```
+
+Then `source secrets/gcp.env` to get `$GCP_EXTERNAL_IP`, `$GCP_APP_URL`, etc. in
+your shell. (These are operational metadata, not access credentials — but it's a
+good place to keep future real secrets like deploy tokens, since the whole
+`secrets/` folder is ignored except `*.example` files.)

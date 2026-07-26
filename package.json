@@ -8,7 +8,8 @@
     "start": "npm --workspace backend start",
     "dev": "npm --workspace backend run dev",
     "db:reset": "npm --workspace backend run db:reset",
-    "verify": "npm --workspace frontend run verify"
+    "verify": "npm --workspace frontend run verify",
+    "gcp:env": "bash scripts/fetch-gcp-env.sh"
   },
   "license": "MIT"
 }

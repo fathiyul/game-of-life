@@ -6,6 +6,10 @@ data/*.sqlite
 data/*.sqlite-wal
 data/*.sqlite-shm
 
+# Local deployment coordinates / secrets (keep the *.example templates tracked)
+secrets/*
+!secrets/*.example
+
 # OS
 .DS_Store
 Thumbs.db
