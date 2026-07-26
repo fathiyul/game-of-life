@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conway's Game of Life</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: sans-serif;
+      color: #eee;
+    }
+    canvas {
+      background: #000;
+      border: 1px solid #333;
+      box-shadow: 0 0 20px rgba(0, 200, 255, 0.2);
+      cursor: crosshair;
+    }
+    .controls {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    button {
+      background: #222;
+      color: #eee;
+      border: 1px solid #444;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover { background: #333; }
+    label { font-size: 14px; }
+    input[type="range"] { vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div class="controls">
+    <button id="play">Pause</button>
+    <button id="randomize">Randomize</button>
+    <button id="clear">Clear</button>
+    <label>Speed
+      <input type="range" id="speed" min="1" max="30" value="10" />
+    </label>
+    <span id="generation">Gen: 0</span>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
