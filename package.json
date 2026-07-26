@@ -1,0 +1,10 @@
+{
+  "name": "game-of-life",
+  "version": "1.0.0",
+  "description": "Conway's Game of Life with a pattern gallery and paintable brushes.",
+  "type": "module",
+  "scripts": {
+    "verify": "node test/verify.js"
+  },
+  "license": "MIT"
+}
