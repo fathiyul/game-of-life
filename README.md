@@ -77,6 +77,12 @@ run. Inspect it with any SQLite client, e.g.:
 sqlite3 data/game-of-life.sqlite "SELECT id, name FROM brushes;"
 ```
 
+To wipe all brushes and drafts and start from an empty database:
+
+```bash
+npm run db:reset
+```
+
 ## Controls (gallery page)
 
 | Action | Input |
